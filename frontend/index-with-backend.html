@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dua Educational Portal - Backend Integrated</title>
+  <style>
+    /* Same styles as original - keeping it concise */
+    :root{
+      --bg: linear-gradient(135deg,#16d2e7,#06434b);
+      --card:#f7f8f9;
+      --accent:#4f05fd;
+      --accent2:#f404a0;
+      --radius:10px;
+      --shadow: 0 8px 20px rgba(16, 84, 244, 0.08);
+      font-family: Inter, system-ui, Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:#011a2a}
+    .wrap{max-width:1200px;margin:10px auto;padding:12px}
+    header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;padding:8px;border-radius:6px;box-shadow:var(--shadow)}
+    .brand{display:flex;align-items:center;gap:15px}
+    .brand img{width:36px;height:36px;border-radius:8px;object-fit:cover}
+    .brand h1{font-size:18px;margin:0;color:#fff}
+    nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    nav a{color:#f5f5f3;text-decoration:none;padding:6px 8px;border-radius:8px;cursor:pointer;font-weight:600}
+    .layout{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:12px}
+    .card{background:var(--card);padding:18px;border-radius:10px;box-shadow:var(--shadow)}
+    h2{margin:0 0 10px 0;color:var(--accent)}
+    label{display:block;font-weight:500;margin-bottom:6px;color:#334155}
+    input,select,textarea,button{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(6,40,61,0.06);margin-bottom:5px;font-size:12px}
+    .btn{cursor:pointer;border:none;padding:10px 12px;border-radius:8px;font-weight:700}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff}
+    .hidden{display:none}
+    .toast{position:fixed;right:20px;bottom:20px;background:#0f766e;color:white;padding:12px 16px;border-radius:8px;z-index:9999;display:none}
+    .status-badge{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700}
+    .status-pending{background:#fef3c7;color:#92400e}
+    .status-approved{background:#d1fae5;color:#065f46}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div>
+        <h1>Dua Educational Academy</h1>
+        <div style="font-size:12px;opacity:0.9">Backend Integrated Portal</div>
+      </div>
+    </div>
+    <nav>
+      <a onclick="showSection('apply')">Apply</a>
+      <a onclick="showSection('slip')">Slip</a>
+      <a onclick="showSection('result')">Result</a>
+      <a onclick="showSection('admin')">Admin</a>
+    </nav>
+  </header>
+
+  <!-- Apply Section -->
+  <div id="applySection" class="card" style="margin-top:20px">
+    <h2>📝 Student Application Form</h2>
+    <form id="applyForm">
+      <label>Student Name *</label>
+      <input type="text" id="name" required>
+      
+      <label>Surname *</label>
+      <input type="text" id="surname" required>
+      
+      <label>Gender *</label>
+      <select id="gender" required>
+        <option value="">Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      
+      <label>Date of Birth *</label>
+      <input type="date" id="dob" required>
+      
+      <label>CNIC *</label>
+      <input type="text" id="cnic" placeholder="12345-6789012-3" required>
+      
+      <label>Class *</label>
+      <input type="text" id="class" placeholder="e.g., Class 8" required>
+      
+      <label>WhatsApp Number</label>
+      <input type="text" id="whatsapp" placeholder="03001234567">
+      
+      <label>Student Photo</label>
+      <input type="file" id="photo" accept="image/*">
+      
+      <label>Father Name *</label>
+      <input type="text" id="fatherName" required>
+      
+      <label>Father Surname *</label>
+      <input type="text" id="fatherSurname" required>
+      
+      <label>Father CNIC *</label>
+      <input type="text" id="fatherCnic" required>
+      
+      <label>Application Fee (Rs.) *</label>
+      <input type="number" id="appFee" value="1000" required>
+      
+      <label>Payment Screenshot *</label>
+      <input type="file" id="feeScreenshot" accept="image/*" required>
+      
+      <label>Payment From Number *</label>
+      <input type="text" id="paymentNumber" placeholder="03009876543" required>
+      
+      <label>Transaction ID *</label>
+      <input type="text" id="txnId" required>
+      
+      <button type="submit" class="btn btn-primary">Submit Application</button>
+    </form>
+    <div id="applyResult" style="margin-top:15px"></div>
+  </div>
+
+  <!-- Slip Section -->
+  <div id="slipSection" class="card hidden" style="margin-top:20px">
+    <h2>🎫 Generate Admission Slip</h2>
+    <input type="text" id="slipRoll" placeholder="Enter Roll Number">
+    <button onclick="generateSlip()" class="btn btn-primary">Generate Slip</button>
+    <div id="slipResult" style="margin-top:15px"></div>
+  </div>
+
+  <!-- Result Section -->
+  <div id="resultSection" class="card hidden" style="margin-top:20px">
+    <h2>📊 Check Result</h2>
+    <input type="text" id="resultRoll" placeholder="Enter Roll Number">
+    <button onclick="checkResult()" class="btn btn-primary">Check Result</button>
+    <div id="resultDisplay" style="margin-top:15px"></div>
+  </div>
+
+  <!-- Admin Section -->
+  <div id="adminSection" class="card hidden" style="margin-top:20px">
+    <h2>⚙️ Admin Panel</h2>
+    <button onclick="loadApplications()" class="btn btn-primary">Load All Applications</button>
+    <div id="adminData" style="margin-top:15px"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<script>
+// API Configuration
+const API_BASE_URL = 'http://localhost:5000/api';
+
+// Helper Functions
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 3000);
+}
+
+function showSection(section) {
+  document.querySelectorAll('[id$="Section"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById(section + 'Section').classList.remove('hidden');
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Application Form Submit
+document.getElementById('applyForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  try {
+    // Get next roll number
+    const rollResponse = await fetch(`${API_BASE_URL}/applications/next-roll`);
+    const rollData = await rollResponse.json();
+    const roll = rollData.roll;
+    
+    // Get form data
+    const photoFile = document.getElementById('photo').files[0];
+    const feeFile = document.getElementById('feeScreenshot').files[0];
+    
+    const photo = photoFile ? await fileToBase64(photoFile) : '';
+    const feeImage = feeFile ? await fileToBase64(feeFile) : '';
+    
+    const applicationData = {
+      roll: roll,
+      name: document.getElementById('name').value,
+      surname: document.getElementById('surname').value,
+      gender: document.getElementById('gender').value,
+      dob: document.getElementById('dob').value,
+      cnic: document.getElementById('cnic').value,
+      class: document.getElementById('class').value,
+      whatsapp: document.getElementById('whatsapp').value,
+      photo: photo,
+      fee_image: feeImage,
+      payment_status: 'Pending',
+      app_fee: parseInt(document.getElementById('appFee').value),
+      payment_sender_number: document.getElementById('paymentNumber').value,
+      father_name: document.getElementById('fatherName').value,
+      father_surname: document.getElementById('fatherSurname').value,
+      father_cnic: document.getElementById('fatherCnic').value,
+      txn_id: document.getElementById('txnId').value
+    };
+    
+    // Submit application
+    const response = await fetch(`${API_BASE_URL}/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(applicationData)
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      document.getElementById('applyResult').innerHTML = `
+        <div style="background:#d1fae5;padding:15px;border-radius:8px;color:#065f46">
+          <strong>✅ Application Submitted Successfully!</strong><br>
+          Roll Number: <strong>${roll}</strong><br>
+          Name: ${applicationData.name} ${applicationData.surname}<br>
+          Status: <span class="status-badge status-pending">Pending Verification</span>
+        </div>
+      `;
+      document.getElementById('applyForm').reset();
+      showToast('Application submitted successfully!');
+    } else {
+      throw new Error(result.message);
+    }
+  } catch (error) {
+    document.getElementById('applyResult').innerHTML = `
+      <div style="background:#fee2e2;padding:15px;border-radius:8px;color:#991b1b">
+        <strong>❌ Error:</strong> ${error.message}
+      </div>
+    `;
+  }
+});
+
+// Generate Slip
+async function generateSlip() {
+  const roll = document.getElementById('slipRoll').value.trim();
+  if (!roll) {
+    showToast('Please enter roll number');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/applications/${roll}`);
+    const result = await response.json();
+    
+    if (!result.success) {
+      document.getElementById('slipResult').innerHTML = `
+        <div style="background:#fee2e2;padding:15px;border-radius:8px;color:#991b1b">
+          Roll number not found
+        </div>
+      `;
+      return;
+    }
+    
+    const app = result.data;
+    
+    if (app.payment_status !== 'Approved') {
+      document.getElementById('slipResult').innerHTML = `
+        <div style="background:#fef3c7;padding:15px;border-radius:8px;color:#92400e">
+          <strong>⚠️ Payment Not Verified</strong><br>
+          Status: ${app.payment_status}<br>
+          Contact admin for verification.
+        </div>
+      `;
+      return;
+    }
+    
+    document.getElementById('slipResult').innerHTML = `
+      <div style="border:3px solid #0077ff;padding:20px;border-radius:12px;background:white">
+        <h3 style="text-align:center;color:#00306e">Dua Educational Academy</h3>
+        <h4 style="text-align:center">Student Admit Slip</h4>
+        ${app.photo ? `<img src="${app.photo}" style="width:120px;height:140px;object-fit:cover;border-radius:8px;display:block;margin:10px auto">` : ''}
+        <p><strong>Name:</strong> ${app.name} ${app.surname}</p>
+        <p><strong>Roll Number:</strong> <span style="color:#0077ff;font-size:20px;font-weight:bold">${app.roll}</span></p>
+        <p><strong>Class:</strong> ${app.class}</p>
+        <p><strong>Gender:</strong> ${app.gender}</p>
+        <p><strong>DOB:</strong> ${app.dob}</p>
+        <p><strong>CNIC:</strong> ${app.cnic}</p>
+        <p><strong>Father:</strong> ${app.father_name} ${app.father_surname}</p>
+        <p><strong>Payment Status:</strong> <span class="status-badge status-approved">${app.payment_status}</span></p>
+      </div>
+    `;
+  } catch (error) {
+    showToast('Error loading slip: ' + error.message);
+  }
+}
+
+// Check Result
+async function checkResult() {
+  const roll = document.getElementById('resultRoll').value.trim();
+  if (!roll) {
+    showToast('Please enter roll number');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/marks/${roll}`);
+    const result = await response.json();
+    
+    if (!result.success) {
+      document.getElementById('resultDisplay').innerHTML = `
+        <div style="background:#fee2e2;padding:15px;border-radius:8px;color:#991b1b">
+          Result not found for roll number: ${roll}
+        </div>
+      `;
+      return;
+    }
+    
+    const marks = result.data;
+    
+    document.getElementById('resultDisplay').innerHTML = `
+      <div style="border:2px solid #0077ff;padding:20px;border-radius:12px;background:white">
+        <h3 style="text-align:center;color:#00306e">Result Card</h3>
+        <p><strong>Name:</strong> ${marks.name}</p>
+        <p><strong>Roll:</strong> ${marks.roll}</p>
+        <p><strong>Class:</strong> ${marks.class}</p>
+        <hr>
+        <table style="width:100%;border-collapse:collapse">
+          <tr><td>Urdu:</td><td><strong>${marks.urdu}/100</strong></td></tr>
+          <tr><td>English:</td><td><strong>${marks.english}/100</strong></td></tr>
+          <tr><td>Math:</td><td><strong>${marks.math}/100</strong></td></tr>
+          <tr><td>Science:</td><td><strong>${marks.science}/100</strong></td></tr>
+          <tr><td>Islamiyat:</td><td><strong>${marks.islamiyat}/100</strong></td></tr>
+          <tr><td>Social:</td><td><strong>${marks.social}/100</strong></td></tr>
+        </table>
+        <hr>
+        <p><strong>Total:</strong> ${marks.total}/600</p>
+        <p><strong>Percentage:</strong> ${marks.percentage}%</p>
+        <p><strong>Grade:</strong> <span style="font-size:24px;color:#0077ff">${marks.grade}</span></p>
+      </div>
+    `;
+  } catch (error) {
+    showToast('Error loading result: ' + error.message);
+  }
+}
+
+// Load Applications (Admin)
+async function loadApplications() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/applications`);
+    const result = await response.json();
+    
+    if (!result.success || result.data.length === 0) {
+      document.getElementById('adminData').innerHTML = '<p>No applications found</p>';
+      return;
+    }
+    
+    let html = '<table style="width:100%;border-collapse:collapse;margin-top:10px">';
+    html += '<tr style="background:#4f05fd;color:white"><th>Roll</th><th>Name</th><th>Class</th><th>Status</th><th>Actions</th></tr>';
+    
+    result.data.forEach(app => {
+      const statusClass = app.payment_status === 'Approved' ? 'status-approved' : 'status-pending';
+      html += `
+        <tr style="border-bottom:1px solid #ddd">
+          <td>${app.roll}</td>
+          <td>${app.name} ${app.surname}</td>
+          <td>${app.class}</td>
+          <td><span class="status-badge ${statusClass}">${app.payment_status}</span></td>
+          <td>
+            ${app.payment_status === 'Pending' ? 
+              `<button onclick="approvePayment('${app.roll}')" class="btn" style="padding:5px 10px;font-size:11px">Approve</button>` : 
+              '✅'}
+          </td>
+        </tr>
+      `;
+    });
+    
+    html += '</table>';
+    document.getElementById('adminData').innerHTML = html;
+  } catch (error) {
+    showToast('Error loading applications: ' + error.message);
+  }
+}
+
+// Approve Payment
+async function approvePayment(roll) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/applications/${roll}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payment_status: 'Approved' })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showToast('Payment approved successfully!');
+      loadApplications();
+    } else {
+      throw new Error(result.message);
+    }
+  } catch (error) {
+    showToast('Error approving payment: ' + error.message);
+  }
+}
+
+// Check backend connection on load
+window.addEventListener('load', async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/health`);
+    const result = await response.json();
+    if (result.success) {
+      console.log('✅ Backend connected successfully');
+    }
+  } catch (error) {
+    console.error('❌ Backend connection failed:', error);
+    showToast('⚠️ Backend server not connected. Please start the backend server.');
+  }
+});
+</script>
+</body>
+</html>
